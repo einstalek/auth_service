@@ -3,6 +3,7 @@ from flask_auth import app, db, bcrypt
 from flask_auth.models import User
 from flask_auth.forms import RegistrationForm, LoginForm
 from flask_auth import encoder
+from cryptography.fernet import InvalidToken
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -40,15 +41,15 @@ def root():
 
 @app.route("/home")
 def home():
-    token = request.cookies.get('token')
-    username = request.cookies.get('username')
+    token: str = request.cookies.get('token')
+    username: str = request.cookies.get('username')
     if token and username:
         try:
             # TODO: шифрование и дешифрование вынести в отдельный сервис
             if encoder.decrypt(token.encode('utf-8')).decode('utf-8') == username:
-                return "Welcome, " + username
-        except:
-            pass
+                return render_template("home.html")
+        except InvalidToken:
+            print('Alarm!')
     return redirect(url_for("login"))
 
 
@@ -58,4 +59,9 @@ def logout():
     resp.set_cookie('token', '')
     resp.set_cookie('username', '')
     return resp
+
+
+@app.route('/watch/<name>')
+def watch(name: str):
+    return redirect("http://localhost:5555/watch/" + name)
 

@@ -9,3 +9,8 @@ class User(db.Model):
 
     def __repr__(self):
         return self.username
+
+    @staticmethod
+    def get(username: str):
+        user = User.query.filter_by(username=username).first()
+        return user

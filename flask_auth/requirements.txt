@@ -2,3 +2,4 @@ flask-wtf
 flask-bcrypt
 flask-sqlalchemy
 cryptography
+requests

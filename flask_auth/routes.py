@@ -1,9 +1,46 @@
 from flask import render_template, redirect, url_for, request
-from flask_auth import app, db, bcrypt
+from flask_auth import app, db, bcrypt, encoder_addr
 from flask_auth.models import User
 from flask_auth.forms import RegistrationForm, LoginForm
-from flask_auth import encoder
 from cryptography.fernet import InvalidToken
+import requests
+from functools import wraps
+import os
+
+path = os.path.dirname(os.path.abspath(__file__)) + '/content/'
+
+
+def images():
+    return [name[:-4] for name in os.listdir(path) if name.endswith('.png')]
+
+
+def encoder_request(d: dict) -> dict:
+    resp = requests.post(encoder_addr, d)
+    return resp.json()
+
+
+def encrypt(username: str) -> str:
+    return encoder_request({'username': username}).get('token')
+
+
+def decrypt(token: str) -> str:
+    return encoder_request({'token': token}).get('username')
+
+
+def check_token(func):
+    @wraps(func)
+    def wrapper(*args, **kargs):
+        token: str = request.cookies.get('token')
+        username: str = request.cookies.get('username')
+        if token and username:
+            try:
+                decrypted = decrypt(token)
+                if decrypted and decrypted == username:
+                    return func(*args, **kargs)
+            except InvalidToken:
+                pass
+        return redirect(url_for("login"))
+    return wrapper
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -11,12 +48,13 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         if form.validate():
-            # TODO: шифрование и дешифрование вынести в отдельный сервис
-            token = encoder.encrypt(form.username.data.encode('utf-8'))
-            resp = redirect(url_for("home"))
-            resp.set_cookie('token', token.decode('utf-8'))
-            resp.set_cookie('username', form.username.data)
-            return resp
+            token = encrypt(form.username.data)
+            if token:
+                token = token.encode('utf-8')
+                resp = redirect(url_for("home"))
+                resp.set_cookie('token', token.decode('utf-8'))
+                resp.set_cookie('username', form.username.data)
+                return resp
     return render_template('login.html', title='Login', form=form)
 
 
@@ -40,17 +78,9 @@ def root():
 
 
 @app.route("/home")
+@check_token
 def home():
-    token: str = request.cookies.get('token')
-    username: str = request.cookies.get('username')
-    if token and username:
-        try:
-            # TODO: шифрование и дешифрование вынести в отдельный сервис
-            if encoder.decrypt(token.encode('utf-8')).decode('utf-8') == username:
-                return render_template("home.html")
-        except InvalidToken:
-            print('Alarm!')
-    return redirect(url_for("login"))
+    return render_template("home.html", path=path, files=images())
 
 
 @app.route('/logout')
@@ -64,4 +94,5 @@ def logout():
 @app.route('/watch/<name>')
 def watch(name: str):
     return redirect("http://localhost:5555/watch/" + name)
+
 

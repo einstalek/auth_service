@@ -7,26 +7,49 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
     <title>Home page</title>
+
+    <style>
+    table, th, td {
+        padding: 10px;
+        }
+
+    </style>
 </head>
+
+
 <body>
 
-    <div class="container">
-          <h1>Home Page</h1>
-          <div class="row">
-                <div class="col-sm-6">
-                    <a href="{{ url_for('watch', name='rabbit.mp4') }}">
-                        <img src="https://i.ytimg.com/vi/aqz-KE-bpKQ/maxresdefault.jpg" height="200" width="500">
-                    </a>
-                </div>
-          </div>
-        <div class="row">
-                <div class="col-sm-6">
-                    <a href="{{ url_for('watch', name='fireworks.mp4') }}">
-                        <img src="https://stone-haven.co.uk/wp-content/uploads/2017/11/CH-Fireworks.jpg" height="200" width="500">
-                    </a>
-                </div>
-          </div>
-    </div>
+    <!--<div class="container">-->
+          <!--<h1>Home Page</h1>-->
+          <!--<div class="row">-->
+                <!--<div class="col-sm-6">-->
+                    <!--<a href="{{ url_for('watch', name='rabbit.mp4') }}">-->
+                        <!--<img src="https://i.ytimg.com/vi/aqz-KE-bpKQ/maxresdefault.jpg" height="200" width="500">-->
+                    <!--</a>-->
+                <!--</div>-->
+          <!--</div>-->
+        <!--<div class="row">-->
+                <!--<div class="col-sm-6">-->
+                    <!--<a href="{{ url_for('watch', name='fireworks.mp4') }}">-->
+                        <!--<img src="https://stone-haven.co.uk/wp-content/uploads/2017/11/CH-Fireworks.jpg" height="200" width="500">-->
+                    <!--</a>-->
+                <!--</div>-->
+          <!--</div>-->
+    <!--</div>-->
 
+    <div class="container">
+        <table>
+            {% for filename in files %}
+                <tr>
+                    <th>
+                        <img src="/content/stars.png" height="200" width="500" />
+                    </th>
+                    <!--<th>-->
+                        <!--"{{path  + filename + '.png'}}"-->
+                    <!--</th>-->
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
 </body>
 </html>

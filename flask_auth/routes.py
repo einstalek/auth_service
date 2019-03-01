@@ -1,17 +1,12 @@
-from flask import render_template, redirect, url_for, request
-from flask_auth import app, db, bcrypt, encoder_addr
-from flask_auth.models import User
-from flask_auth.forms import RegistrationForm, LoginForm
-from cryptography.fernet import InvalidToken
-import requests
 from functools import wraps
-import os
 
-path = os.path.dirname(os.path.abspath(__file__)) + '/content/'
+import requests
+from cryptography.fernet import InvalidToken
+from flask import render_template, redirect, url_for, request
 
-
-def images():
-    return [name[:-4] for name in os.listdir(path) if name.endswith('.png')]
+from flask_auth import app, db, bcrypt, encoder_addr, content_addr
+from flask_auth.forms import RegistrationForm, LoginForm
+from flask_auth.models import User
 
 
 def encoder_request(d: dict) -> dict:
@@ -80,7 +75,7 @@ def root():
 @app.route("/home")
 @check_token
 def home():
-    return render_template("home.html", path=path, files=images())
+    return render_template("home.html")
 
 
 @app.route('/logout')
@@ -93,6 +88,6 @@ def logout():
 
 @app.route('/watch/<name>')
 def watch(name: str):
-    return redirect("http://localhost:5555/watch/" + name)
+    return redirect(content_addr + 'watch/' + name)
 
 

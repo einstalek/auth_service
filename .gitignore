@@ -1,3 +1,4 @@
 .idea/
 flask_auth/__pycache__
 flask_auth/auth.db
+flask_auth/__init__.pyc
